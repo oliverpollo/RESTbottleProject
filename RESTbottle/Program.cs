@@ -8,6 +8,9 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+var connectionString =
+    builder.Configuration.GetConnectionString("SimplyConnection");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
