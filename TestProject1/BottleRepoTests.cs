@@ -1,18 +1,46 @@
-﻿using System;
-using Xunit;
-using RESTbottle.Repos;
+﻿using Microsoft.EntityFrameworkCore;
+using RESTbottle.EFCore;
 using RESTbottle.Models;
+using RESTbottle.Repos;
+using System;
 using System.Security.Cryptography.X509Certificates;
+using Xunit;
 
 namespace TestProject1
 {
     public class UnitTestsOfBottlesRepository
     {
+
+        private bool useDatabase = true; // Set to true to use BottlesRepositoryDatabase, false to use BottlesRepositoryList
+        private IBottlesRepository repo;
+        public UnitTestActorsRepository()
+        {
+            // You can set the useDatabase variable here based on your testing needs
+            // For example, you can read from a configuration file or environment variable
+            if (useDatabase) 
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<BottlesDBContext>();
+                // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets
+                optionsBuilder.UseSqlServer(Secrets.ConnectionStringSimply);
+                // connection string structure
+                //   "Data Source=mssql7.unoeuro.com;Initial Catalog=FROM simply.com;Persist Security Info=True;User ID=FROM simply.com;Password=DB PASSWORD FROM simply.com;TrustServerCertificate=True"
+                BottlesDBContext _dbContext = new(optionsBuilder.Options);
+                // clean database table: remove all rows
+                _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Bottles");
+                repo = new BottlesRepositoryDatabase(_dbContext);
+
+            }
+            else 
+            { 
+                repo = new BottlesRepositoryList ();
+            }
+        }
+
         [Fact]
         public void TestGetBottleById_Returns_Correct_Bottle()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
+            
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             bottlesRepository.AddBottle(b1);
@@ -27,7 +55,7 @@ namespace TestProject1
         public void TestAdd()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
+            IBottlesRepository bottlesRepository = new BottlesRepositoryList();
 
             Bottle b = new Bottle { Volume = 500, Name = "Test Bottle" };
 
@@ -44,7 +72,6 @@ namespace TestProject1
         public void TestGetMethodWithBottles()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Bottle 3" };
@@ -63,7 +90,7 @@ namespace TestProject1
         public void TestBottleConstructorWithTestData()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList(includesTestData: true);
+            IBottlesRepository bottlesRepository = new BottlesRepositoryList(includesTestData: true);
             //Act
             var allBottles = bottlesRepository.GetAllBottles();
             //Assert
@@ -74,7 +101,7 @@ namespace TestProject1
         public void TestBottleConstructorWithoutTestData()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList(includesTestData: false);
+            IBottlesRepository bottlesRepository = new BottlesRepositoryList(includesTestData: false);
             //Act
             var allBottles = bottlesRepository.GetAllBottles();
             //Assert
@@ -87,7 +114,7 @@ namespace TestProject1
         public void TestConstructorWithDefaultValue()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
+            IBottlesRepository bottlesRepository = new BottlesRepositoryList();
             //Act
             var allBottles = bottlesRepository.GetAllBottles();
             //Assert
@@ -100,7 +127,7 @@ namespace TestProject1
         public void TestGetMethodWithNameStartsWith()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
+            IBottlesRepository bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -117,7 +144,6 @@ namespace TestProject1
         public void TestGetMethod_WhereNameStartsWith_isNull()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -137,7 +163,6 @@ namespace TestProject1
         public void TestDeleteBottleById_Returns_Correct_Bottle()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b = new Bottle { Volume = 500, Name = "Test Bottle" };
             Bottle addedBottle = bottlesRepository.AddBottle(b);
             //Act
@@ -153,7 +178,6 @@ namespace TestProject1
         public void TestDeleteBottleById_Returns_Null_For_Nonexistent_Bottle()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             //Act
             Bottle? deletedBottle = bottlesRepository.DeleteByIdBottle(999); // Non-existent ID
             //Assert
@@ -165,7 +189,6 @@ namespace TestProject1
         public void TestUpdateBottle_Returns_Updated_Bottle()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle bottleToUpdate = new Bottle { Volume = 500, Name = "Old Name" };
             Bottle addedBottle = bottlesRepository.AddBottle(bottleToUpdate);
             //Act
@@ -183,7 +206,6 @@ namespace TestProject1
         public void TestGetV2WhereMinVolumeIsNullAndNameStartsWithIsNull()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -201,7 +223,6 @@ namespace TestProject1
         public void TestGetV2MethodWithFiltersAndSortingWhereMinVolumeIsNull()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -219,7 +240,6 @@ namespace TestProject1
         public void TestGetV2MethodWithFiltersAndSortingWhereMinVolumeIsNotNull()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -236,7 +256,6 @@ namespace TestProject1
         public void TestGetV2MethodWithFiltersAndSortingWhereNameStartsWithIsNull()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
@@ -271,7 +290,6 @@ namespace TestProject1
         public void TestGetV2MethodWithFiltersAndSortingWhereSortOrderIsInvalid()
         {
             //Arrange
-            BottlesRepositoryList bottlesRepository = new BottlesRepositoryList();
             Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
             Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             Bottle b3 = new Bottle { Volume = 1000, Name = "Test Bottle" };
