@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RESTbottle/RESTbottle.csproj" />
+  <Project Path="TestProject1/TestProject1.csproj" Id="fa348677-ad7e-47d8-82e7-b7072a4f6c1a" />
+</Solution>
