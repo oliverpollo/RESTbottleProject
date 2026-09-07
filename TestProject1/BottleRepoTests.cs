@@ -2,39 +2,52 @@
 using RESTbottle.EFCore;
 using RESTbottle.Models;
 using RESTbottle.Repos;
-using System;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 namespace TestProject1
 {
     public class UnitTestsOfBottlesRepository
     {
+        private bool useDatabase = true;
 
-        private bool useDatabase = true; // Set to true to use BottlesRepositoryDatabase, false to use BottlesRepositoryList
-        private IBottlesRepository repo;
-        public UnitTestActorsRepository()
+        private IBottlesRepository bottlesRepository;
+
+        public UnitTestsOfBottlesRepository()
         {
-            // You can set the useDatabase variable here based on your testing needs
-            // For example, you can read from a configuration file or environment variable
-            if (useDatabase) 
+            if (useDatabase)
             {
-                var optionsBuilder = new DbContextOptionsBuilder<BottlesDBContext>();
-                // https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets
-                optionsBuilder.UseSqlServer(Secrets.ConnectionStringSimply);
-                // connection string structure
-                //   "Data Source=mssql7.unoeuro.com;Initial Catalog=FROM simply.com;Persist Security Info=True;User ID=FROM simply.com;Password=DB PASSWORD FROM simply.com;TrustServerCertificate=True"
-                BottlesDBContext _dbContext = new(optionsBuilder.Options);
-                // clean database table: remove all rows
-                _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Bottles");
-                repo = new BottlesRepositoryDatabase(_dbContext);
+                var optionsBuilder =
+                    new DbContextOptionsBuilder<BottlesDBContext>();
 
+                // Connection string ligger i Secrets.cs
+                // Secrets.cs bliver ignoreret af Git
+                optionsBuilder.UseMySql(
+                Secrets.ConnectionStringSimply,
+                ServerVersion.AutoDetect(Secrets.ConnectionStringSimply)
+);
+
+                BottlesDBContext dbContext =
+                    new BottlesDBContext(optionsBuilder.Options);
+
+                // Opret tabellerne hvis databasen er helt tom
+                dbContext.Database.EnsureCreated();
+
+                // Ryd Bottles-tabellen før hver testkørsel
+                dbContext.Database.ExecuteSqlRaw(
+                    "TRUNCATE TABLE Bottles"
+                );
+
+                bottlesRepository =
+                    new BottlesRepositoryDatabase(dbContext);
             }
-            else 
-            { 
-                repo = new BottlesRepositoryList ();
+            else
+            {
+                bottlesRepository =
+                    new BottlesRepositoryList();
             }
         }
+
+        // DINE TESTS FORTSÆTTER HER...
 
         [Fact]
         public void TestGetBottleById_Returns_Correct_Bottle()

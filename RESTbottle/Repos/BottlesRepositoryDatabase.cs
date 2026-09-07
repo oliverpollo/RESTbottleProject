@@ -7,7 +7,12 @@ namespace RESTbottle.Repos
     public class BottlesRepositoryDatabase : IBottlesRepository
     {
 
-        private BottlesDBContext _context;
+        private readonly BottlesDBContext _context;
+
+        public BottlesRepositoryDatabase(BottlesDBContext context)
+        {
+            _context = context;
+        }
         public Bottle AddBottle(Bottle bottle)
         {
             _context.Bottles.Add(bottle);
