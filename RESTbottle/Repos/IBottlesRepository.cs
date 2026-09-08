@@ -5,6 +5,7 @@ namespace RESTbottle.Repos
     public interface IBottlesRepository
     {
         Bottle AddBottle(Bottle bottle);
+        Bottle DeleteBottle (Bottle bottle);
         Bottle? DeleteByIdBottle(int id);
         IEnumerable<Bottle> Get(string? nameStartsWith = null);
         List<Bottle> GetAllBottles();

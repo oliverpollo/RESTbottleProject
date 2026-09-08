@@ -10,7 +10,7 @@ namespace RESTbottle.Repos
 
         private int _nextId = 1;
 
-        public BottlesRepositoryList(bool includesTestData = false)
+        public BottlesRepositoryList(bool includesTestData = true)
         {
             if (includesTestData)
             {
@@ -133,6 +133,11 @@ namespace RESTbottle.Repos
                 bottle.Name = updatedBottle.Name;
 
             }
+            return bottle;
+        }
+        public Bottle DeleteBottle(Bottle bottle)
+        {
+            _bottles.Remove(bottle);
             return bottle;
         }
     }
