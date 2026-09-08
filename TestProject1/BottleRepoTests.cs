@@ -12,6 +12,10 @@ namespace TestProject1
 
         private IBottlesRepository bottlesRepository;
 
+        private Bottle b1 = new Bottle { Volume = 500, Name = "TestBottle 1" };
+        private Bottle b2 = new Bottle { Volume = 750, Name = "TestBottle 2" };
+        private Bottle b3 = new Bottle { Volume = 1000, Name = "TestBottle 3" };
+
         public UnitTestsOfBottlesRepository()
         {
             if (useDatabase)
