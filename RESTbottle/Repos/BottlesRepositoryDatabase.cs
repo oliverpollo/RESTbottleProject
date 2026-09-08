@@ -64,5 +64,11 @@ namespace RESTbottle.Repos
         {
             throw new NotImplementedException();
         }
+        public Bottle DeleteBottle(Bottle bottle)
+        {
+            _context.Bottles.Remove(bottle);
+            _context.SaveChanges();
+            return bottle;
+        }
     }
 }
