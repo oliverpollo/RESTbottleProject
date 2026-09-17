@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RESTbottle.Controllers;
 using RESTbottle.EFCore;
 using RESTbottle.Models;
 using RESTbottle.Repos;
@@ -9,53 +10,103 @@ namespace TestProject1
     public class UnitTestsOfBottlesRepository
     {
         private bool useDatabase = true;
+        private bool useInMemoryDatabase = false;
 
         private IBottlesRepository bottlesRepository;
 
-        public UnitTestsOfBottlesRepository()
+        private Bottle b1 = new Bottle { Volume = 500, Name = "TestBottle 1" };
+        private Bottle b2 = new Bottle { Volume = 750, Name = "TestBottle 2" };
+        private Bottle b3 = new Bottle { Volume = 1000, Name = "TestBottle 3" };
+
+//        public UnitTestsOfBottlesRepository()
+//        {
+//            if (useDatabase)
+//            {
+//                if (useInMemoryDatabase)
+//                {
+//                    var optionsBuilder = new DbContextOptionsBuilder<BottlesDBContext>();
+//                    optionsBuilder.UseInMemoryDatabase("TestBottlesDB");
+//                    BottlesDBContext _dbContext = new BottlesDBContext(optionsBuilder.Options);
+//                    bottlesRepository = new BottlesRepositoryDatabase(_dbContext);
+//                }
+//                else
+//                {
+//                    //InitializeDatabaseRepository();
+//                    var optionsBuilder =
+//                    new DbContextOptionsBuilder<BottlesDBContext>();
+
+//                    // Connection string ligger i Secrets.cs
+//                    // Secrets.cs bliver ignoreret af Git
+//                    optionsBuilder.UseMySql(
+//                    Secrets.ConnectionStringBottlesDB,
+//                    ServerVersion.AutoDetect(Secrets.ConnectionStringBottlesDB)
+//    );
+
+//                    BottlesDBContext dbContext =
+//                        new BottlesDBContext(optionsBuilder.Options);
+
+//                    // Opret tabellerne hvis databasen er helt tom
+//                    dbContext.Database.EnsureCreated();
+
+//                    // Ryd Bottles-tabellen før hver testkørsel
+//                    dbContext.Database.ExecuteSqlRaw(
+//                        "TRUNCATE TABLE Bottles"
+//                    );
+
+//                    bottlesRepository =
+//                        new BottlesRepositoryDatabase(dbContext);
+//                }
+//                var optionsBuilder =
+//                    new DbContextOptionsBuilder<BottlesDBContext>();
+
+//                // Connection string ligger i Secrets.cs
+//                // Secrets.cs bliver ignoreret af Git
+//                optionsBuilder.UseMySql(
+//                Secrets.ConnectionStringBottlesDB,
+//                ServerVersion.AutoDetect(Secrets.ConnectionStringBottlesDB)
+//);
+
+//                BottlesDBContext dbContext =
+//                    new BottlesDBContext(optionsBuilder.Options);
+
+//                // Opret tabellerne hvis databasen er helt tom
+//                dbContext.Database.EnsureCreated();
+
+//                // Ryd Bottles-tabellen før hver testkørsel
+//                dbContext.Database.ExecuteSqlRaw(
+//                    "TRUNCATE TABLE Bottles"
+//                );
+
+//                bottlesRepository =
+//                    new BottlesRepositoryDatabase(dbContext);
+//            }
+//            else
+//            {
+//                bottlesRepository =
+//                    new BottlesRepositoryList();
+//            }
+//        }
+        //Test herunder: 
+
+        [Fact]
+
+        public void TestGetAllBottles_Returns_Correct_Count()
         {
-            if (useDatabase)
-            {
-                var optionsBuilder =
-                    new DbContextOptionsBuilder<BottlesDBContext>();
-
-                // Connection string ligger i Secrets.cs
-                // Secrets.cs bliver ignoreret af Git
-                optionsBuilder.UseMySql(
-                Secrets.ConnectionStringSimply,
-                ServerVersion.AutoDetect(Secrets.ConnectionStringSimply)
-);
-
-                BottlesDBContext dbContext =
-                    new BottlesDBContext(optionsBuilder.Options);
-
-                // Opret tabellerne hvis databasen er helt tom
-                dbContext.Database.EnsureCreated();
-
-                // Ryd Bottles-tabellen før hver testkørsel
-                dbContext.Database.ExecuteSqlRaw(
-                    "TRUNCATE TABLE Bottles"
-                );
-
-                bottlesRepository =
-                    new BottlesRepositoryDatabase(dbContext);
-            }
-            else
-            {
-                bottlesRepository =
-                    new BottlesRepositoryList();
-            }
+            //Arrange
+            bottlesRepository.AddBottle(b1);
+            bottlesRepository.AddBottle(b2);
+            bottlesRepository.AddBottle(b3);
+            //Act
+            var allBottles = bottlesRepository.GetAllBottles();
+            //Assert
+            Assert.Equal(3, allBottles.Count());
         }
-
-        // DINE TESTS FORTSÆTTER HER...
 
         [Fact]
         public void TestGetBottleById_Returns_Correct_Bottle()
         {
-            //Arrange
+            //Arrange        
             
-            Bottle b1 = new Bottle { Volume = 500, Name = "Bottle 1" };
-            Bottle b2 = new Bottle { Volume = 750, Name = "Bottle 2" };
             bottlesRepository.AddBottle(b1);
             bottlesRepository.AddBottle(b2);
             //Act
