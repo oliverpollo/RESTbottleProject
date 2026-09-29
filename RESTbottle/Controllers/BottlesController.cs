@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RESTbottle.Models;
 using RESTbottle.Repos;
 using System.Runtime.CompilerServices;
@@ -21,6 +22,7 @@ namespace RESTbottle.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "user")]
         [HttpGet ("{id}")]
         public ActionResult<Bottle> Get([FromRoute] int id)
         { 
@@ -34,6 +36,7 @@ namespace RESTbottle.Controllers
 
 
         // GET: api/<BottlesController>
+        [Authorize(Roles = "user")]
         [HttpGet]
         public ActionResult<IEnumerable<Bottle>> Getv2([FromQuery] string? nameStartsWith = null, [FromQuery] double? minVolume = null, [FromQuery] string? sortOrder = null)
         {
@@ -46,6 +49,7 @@ namespace RESTbottle.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
 
         public ActionResult<Bottle> Post([FromBody] Bottle value)
@@ -56,6 +60,7 @@ namespace RESTbottle.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public ActionResult<Bottle> Put(int id, [FromBody] Bottle value)
         {
@@ -69,6 +74,7 @@ namespace RESTbottle.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {

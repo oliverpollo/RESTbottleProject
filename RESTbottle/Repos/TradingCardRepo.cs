@@ -35,6 +35,7 @@ namespace RESTbottle.Repos
                 TeamName = "Bayern",
                 Rarity = "Epic"
             }
+
         };
 
         public List<TradingCards> GetAllTradingCards()

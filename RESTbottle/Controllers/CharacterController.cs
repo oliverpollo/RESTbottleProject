@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using RESTbottle.Models;
 using RESTbottle.Repos;
 
@@ -8,6 +9,7 @@ namespace RESTbottle.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("LocalDev")]
     public class CharactersController : ControllerBase
     {
         private ICharacterRepo repo;
@@ -39,6 +41,8 @@ namespace RESTbottle.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [HttpPost]
+
         [HttpPost]
 
         public ActionResult<Characters> Post([FromBody] Characters value)
