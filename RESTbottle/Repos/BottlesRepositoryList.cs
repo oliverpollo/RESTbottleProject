@@ -1,5 +1,6 @@
 ﻿using RESTbottle.Models;
 using System.Collections.ObjectModel;
+using System.Xml.XPath;
 
 namespace RESTbottle.Repos
 {
@@ -14,23 +15,13 @@ namespace RESTbottle.Repos
         {
             if (includesTestData)
             {
-                AddBottle(new Bottle { Volume = 500, Name = "Test Bottle 1" });
-                AddBottle(new Bottle { Volume = 750, Name = "Test Bottle 2" });
-                AddBottle(new Bottle { Volume = 1000, Name = "Test Bottle 3" });
+                AddBottle(new Bottle { Volume = 500, Name = "A Test Bottle 1" });
+                AddBottle(new Bottle { Volume = 750, Name = " BTest Bottle 2" });
+                AddBottle(new Bottle { Volume = 1000, Name = "C Test Bottle 3" });
             }
         }
-        public IEnumerable<Bottle> Get(string? nameStartsWith = null)
+        public IEnumerable<Bottle> Get(string? nameStartsWith = null, double? minVolume = null, string? sortOrder = null)
         {
-            if (nameStartsWith == null)
-            {
-                return _bottles.ToList();
-            }
-            return _bottles.Where(b => b.Name != null && b.Name.StartsWith(nameStartsWith));
-        }
-
-        public IEnumerable<Bottle> GetV2(string? nameStartsWith = null, double? minVolume = null, string? sortOrder = null)
-        {
-
             IEnumerable<Bottle> result = _bottles.ToList();
 
             if (minVolume != null)
@@ -43,7 +34,14 @@ namespace RESTbottle.Repos
                 result = result.Where(b => b.Name != null && b.Name.StartsWith(nameStartsWith));
             }
 
-            switch (sortOrder?.ToLower())
+            if (string.IsNullOrWhiteSpace(sortOrder))
+            {
+                // No sort requested — return filtered result as-is
+                return result;
+            }
+
+            var so = sortOrder!.Trim().ToLowerInvariant();
+            switch (so)
             {
                 case "name":
                 case "name_asc":
@@ -59,32 +57,53 @@ namespace RESTbottle.Repos
                 case "volume_desc":
                     result = result.OrderByDescending(b => b.Volume);
                     break;
-                default: throw new ArgumentException($"Invalid sortOrder value: {sortOrder}. Valid values are: name_asc, name_desc, volume_asc, volume_desc.");
+                default:
+                    throw new ArgumentException($"Invalid sortOrder value: {sortOrder}. Valid values are: name_asc, name_desc, volume_asc, volume_desc.");
             }
 
-            //if (sortOrder != null)
-            //{
-            //    if (sortOrder == "name_asc")
-            //    {
-            //        result = result.OrderBy(b => b.Name);
-            //    }
-            //    else if (sortOrder == "name_desc")
-            //    {
-            //        result = result.OrderByDescending(b => b.Name);
-            //    }
-            //    else if (sortOrder == "volume_asc")
-            //    {
-            //        result = result.OrderBy(b => b.Volume);
-            //    }
-            //    else if (sortOrder == "volume_desc")
-            //    {
-            //        result = result.OrderByDescending(b => b.Volume);
-            //    }
-            //    else
-            //    {
-            //        throw new ArgumentException($"Invalid sortOrder value: {sortOrder}. Valid values are: name_asc, name_desc, volume_asc, volume_desc.");
-            //    }
-            //}
+            return result;
+        }
+
+        public IEnumerable<Bottle> GetV2(string? nameStartsWith = null, double? minVolume = null, string? sortOrder = null)
+        {
+            IEnumerable<Bottle> result = _bottles.ToList();
+
+            if (minVolume != null)
+            {
+                result = result.Where(b => b.Volume >= minVolume);
+            }
+
+            if (nameStartsWith != null)
+            {
+                result = result.Where(b => b.Name != null && b.Name.StartsWith(nameStartsWith));
+            }
+
+            if (string.IsNullOrWhiteSpace(sortOrder))
+            {
+                // No sort requested — return filtered result as-is
+                return result;
+            }
+
+            var so = sortOrder!.Trim().ToLowerInvariant();
+            switch (so)
+            {
+                case "name":
+                case "name_asc":
+                    result = result.OrderBy(b => b.Name);
+                    break;
+                case "name_desc":
+                    result = result.OrderByDescending(b => b.Name);
+                    break;
+                case "volume":
+                case "volume_asc":
+                    result = result.OrderBy(b => b.Volume);
+                    break;
+                case "volume_desc":
+                    result = result.OrderByDescending(b => b.Volume);
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid sortOrder value: {sortOrder}. Valid values are: name_asc, name_desc, volume_asc, volume_desc.");
+            }
 
             return result;
         }
@@ -139,6 +158,11 @@ namespace RESTbottle.Repos
         {
             _bottles.Remove(bottle);
             return bottle;
+        }
+
+        public IEnumerable<Bottle> Get(string? nameStartsWith = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }
