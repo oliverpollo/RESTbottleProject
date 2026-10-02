@@ -43,7 +43,7 @@ namespace RESTbottle.Repos
 
         public Characters AddCharacter(Characters character)
         {
-            character.Id = _characters.Max(c => c.Id) + 1;
+            character.Id = _characters.Count == 0 ? 1 : _characters.Max(c => c.Id) + 1;
             _characters.Add(character);
 
             return character;

@@ -31,29 +31,16 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-const string AllowALLCORS = "AllowAll";
+const string FrontendClients = "FrontendClients";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: AllowALLCORS,
-                              policy =>
-                              {
-                                  policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                              });
-    options.AddPolicy(name: "TESTCORS",
-        policy =>
-    {
-        policy.AllowAnyOrigin().WithMethods("GET").AllowAnyHeader();
-
-    });
-
-    // Local development policy for pages served from VS Code Live Server
-    options.AddPolicy(name: "LocalDev",
-        policy =>
-    {
-        policy.WithOrigins("http://127.0.0.1:5501", "http://localhost:5501").AllowAnyMethod().AllowAnyHeader();
-    });
-
+    // This is a public teaching API, so browser clients served by Live Server
+    // (or another front-end project) may use every CRUD endpoint.
+    options.AddPolicy(FrontendClients, policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
@@ -85,17 +72,14 @@ var connectionString =
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Live Server uses the local HTTP launch profile during development. Azure (and
+// other production hosts) should still redirect clients to HTTPS.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
-// Use LocalDev CORS during development so the API can be called from VS Code Live Server
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("LocalDev");
-}
-else
-{
-    app.UseCors("TESTCORS");
-}
+app.UseCors(FrontendClients);
 
 app.UseAuthentication();
 app.UseAuthorization();
