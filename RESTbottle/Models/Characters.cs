@@ -3,7 +3,7 @@
     public class Characters
     {
         public int Id { get; set; }
-        public string CharacterName { get; set; }
+        public string CharacterName { get; set; } = string.Empty;
         public int Level { get; set; }
         public string Class { get; set; } = string.Empty;
     }

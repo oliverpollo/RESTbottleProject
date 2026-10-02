@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using RESTbottle.Models;
 using RESTbottle.Repos;
 
@@ -40,7 +41,6 @@ namespace RESTbottle.Controllers
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [HttpPost]
-
         public ActionResult<Characters> Post([FromBody] Characters value)
         {
             repo.AddCharacter(value);
