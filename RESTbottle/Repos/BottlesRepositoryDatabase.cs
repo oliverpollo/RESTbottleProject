@@ -31,9 +31,45 @@ namespace RESTbottle.Repos
             return bottle;
         }
 
+        public IEnumerable<Bottle> Get(string? nameStartsWith = null, double? minVolume = null, string? sortOrder = null)
+        {          
+
+            IQueryable<Bottle> query = _context.Bottles;
+
+            if (nameStartsWith != null)
+            {
+                query = query.Where(b => b.Name.StartsWith(nameStartsWith));
+            }
+            if (minVolume != null)
+            {
+                query = query.Where(b => b.Volume >= minVolume);
+            }
+            if (sortOrder != null) 
+            { 
+                switch (sortOrder.ToLower()) {
+                    case "name":
+                    case "name_asc":
+                        query = query.OrderBy(b => b.Name);
+                        break;
+                    case "name_desc":
+                        query = query.OrderByDescending(b => b.Name);
+                        break;
+                    case "volume":
+                    case "volume_asc":
+                        query = query.OrderBy(b => b.Volume);
+                        break;
+                    case "volume_desc":
+                        query = query.OrderByDescending(b => b.Volume);
+                        break;
+                }
+            }
+            return query.ToList();
+        }
+
         public IEnumerable<Bottle> Get(string? nameStartsWith = null)
         {
-            return _context.Bottles.Where(b => nameStartsWith == null || b.Name.StartsWith(nameStartsWith)).ToList();
+            // delegate to the existing overload
+            return Get(nameStartsWith, null, null);
         }
 
         public List<Bottle> GetAllBottles()
